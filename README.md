@@ -1,5 +1,5 @@
 ```
-The AI Director Framework (Dynamic Master Version - Corrected & Enhanced)
+The AI Director Framework Dynamic Master Version - Corrected & Enhanced
 
 Objective: To guide an LLM through a highly complex software development or refactoring task using an iterative, investigative process. This framework is for situations where the full scope may not be known at the outset, requiring the AI to act as a co-investigator to uncover all necessary components.
 
