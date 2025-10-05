@@ -1,4 +1,4 @@
-# 🎯 Zero-Assumption Development (ZAD) Framework
+# 🎯 Zero-Assumption Development (ZAD) Framework FoR Gemini2.5 PRO
 ## Complete Documentation & Usage Guide
 
 ---
