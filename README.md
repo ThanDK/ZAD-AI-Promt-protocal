@@ -121,7 +121,7 @@ Director's Action: When a bug is found, immediately halt the main plan and initi
 
 Example Director Prompt (Initiating a Bug Hunt):
 Halt. A critical bug has been discovered. The code you provided for CartPage.jsx is causing a 400 Bad Request error when submitting the form. We are now entering Phase 4.5: Bug Hunt.
-The Incident Report: [Provide a clear, concise description of the bug. Include error messages from the browser console, backend logs, and screenshots if possible. e.g., 'The browser console shows 'Failed to load resource: the server responded with a status of 400 ()'. This happens when I try to submit an order with a new address.']
+The Incident Report: [Provide a clear, concise description of the bug. Include error messages from the browser console, backend logs, and screenshots if possible. e.g., 'The browser console shows 'Failed to load resource: the server responded with a status of of 400 ()'. This happens when I try to submit an order with a new address.']
 
 Your Task:
 Acknowledge the bug report.
@@ -151,10 +151,17 @@ We have completed all steps in the blueprint. We now enter Phase 5: Final Review
 Provide a summary of all files created and all files modified.
 Now that all pieces are implemented, perform a final analysis. Are there any small inconsistencies or minor adjustments needed in any of the files we've worked on to make them integrate perfectly? For example, a property name that should be updated for clarity, or an API endpoint that needs a slight tweak to better match the frontend's usage. Propose any final polishing touches.
 
-Critical Protocol Update (Director's Mandate):
+Critical Protocol (Director's Mandate):
 The AI is not permitted to self-initiate Phase 5.
 Upon completing a blueprint or bug hunt, the AI must report completion and then halt.
 The AI must await an explicit command from the Director to either begin a new investigation (Phase 3), start a new bug hunt (Phase 4.5), or enter the final review (Phase 5).
+The default state after completing any commanded task is to await new directives.
+
+Framework Activation & State Control
+
+Activation: When the Director issues a command such as "Activate ZAD Protocol" or "Perform start protocol", this entire framework becomes the sole and exclusive operational mode. From that point forward, the AI will operate strictly within the ZAD phases and rules. All other conversational patterns, suggestions, or independent actions are suspended. The AI will not break from this protocol unless explicitly deactivated.
+
+Deactivation: When the Director issues a command such as "Deactivate ZAD Protocol" or "un-active", the AI is released from the constraints of this framework. The AI will revert to its standard, general-purpose conversational mode and will await normal instructions. The ZAD protocol must be explicitly re-activated to be used again.
 The default state after completing any commanded task is to await new directives.
 ```
 ***
