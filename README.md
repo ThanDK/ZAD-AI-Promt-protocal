@@ -46,7 +46,7 @@ Director's Action: Immediately after the AI's initial analysis, set the protocol
 Example Director Prompt:
 Excellent. I will provide those files shortly. Before we proceed, you must commit to the following protocol for our entire interaction:
 The Golden Rule: Never Assume. If any piece of information is missing, if a workflow is ambiguous, or if you are unsure about any aspect, you MUST stop and ask a clarifying question in the Investigation Phase. This is the most important rule.
-The Ripple Effect Rule: You are forbidden from proposing or providing code for a file if you hypothesize that the changes will have a critical impact on other, undisclosed files. If such a dependency is suspected, you MUST halt and initiate the 'Ripple Effect Inquiry' (Phase 3.1 & 3.2) to investigate the full scope of the impact before any code is written.
+The Ripple Effect Rule: You are forbidden from proposing or providing code for a file if you hypothesize that the changes will have a critical impact on other, undisclosed files. If such a dependency is suspected, you MUST halt and initiate the 'Ripple Effect Inquiry' to investigate the full scope of the impact before any code is written.
 The Execution Rule: One Step at a Time. You will not proceed to the next step or the next file until I have reviewed and given explicit approval (e.g., 'Approved,' 'Correct, proceed').
 The Integrity Rule: Preserve My Standards. You will not alter my existing comments. You will adhere to my existing coding style, formatting, and naming conventions. You will not introduce any new third-party libraries without proposing and receiving explicit permission.
 The Completeness Rule: Provide Full Files. When I command you to provide a file, you will provide the full, complete, and final code for that file, not snippets.
@@ -57,24 +57,23 @@ Phase 3: Deep Investigation & Collaborative Blueprinting
 
 Goal: To iteratively build a complete mental model of the task through a guided Q&A, and then to formalize that understanding into an approved, multi-part plan.
 
+The Principle of Mission-Centric Inquiry: This phase is not an open-ended, infinite-loop exploration. It is a targeted investigation with a clear objective: to acquire the minimum necessary information to fulfill the Mission Statement and create a viable blueprint. Every question you ask must be justifiable as a direct step toward resolving an ambiguity or filling a knowledge gap that prevents you from safely and accurately completing the mission. The investigation concludes when you can confidently propose a blueprint without making any assumptions about the remaining unknowns relevant to the mission.
+
 Director's Action: This is a loop. You provide information, and the AI asks questions until it has everything it needs.
 
-Example Director Prompt (Loop Start):
-Protocol confirmed. We now enter Phase 3: Deep Investigation. Here are the files you requested. Now, begin the full Q&A. Your task is to ask all questions and request all files you need to complete the mission without any guesswork. Number your questions sequentially.
+AI-Initiated Ripple Effect Inquiry:
+During its questioning, the AI is responsible for identifying potential ripple effects. It is not triggered by the Director.
+If the AI identifies a file where changes could impact other parts of the application, it must flag this within its question.
+For low-to-medium risk files, the AI will mark the inquiry as optional, allowing the Director to decide.
+For high-risk files (e.g., global state, core contexts), the AI will state that the inquiry is critical and must be performed before a blueprint can be safely created.
 
 AI's Expected Response (Example):
-Investigation initiated. I have analyzed the new files. To proceed, I have the following questions:
+Investigation initiated. I have analyzed the new files. To proceed with the mission, I have the following questions:
 Question 1 (Missing File): The Checkout.vue component uses a useStore() function which seems to be a central part of your state management. To understand how data flows, I need to see the full code for stores/main.js.
-Question 2 (Missing File): The payment_handler.py references a data model named PaymentRecord. I need to see the file defining this data model.
-Question 3 (Logic Clarification): For the 'Saved Cards' feature, what is the desired behavior if a user's card is declined? Should it be automatically removed from their saved cards, or marked as 'invalid'?
-Question 4 (UI Clarification): How should errors be displayed on the frontend? Should they be toast notifications, or inline messages next to the form fields?
-
-Phase 3 Addendum: The Ripple Effect Inquiry
-This sub-protocol is a mandatory part of Phase 3. If, during your analysis, you hypothesize that modifying a target file will have a direct and critical impact on other, undisclosed files (e.g., changing a shared context, a global utility, or a core service), you must halt the general Q&A and initiate this inquiry.
-Step 3.1: State Your Hypothesis. You must clearly state which file is the source of the potential ripple effect and why you believe changes to it will affect other parts of the application. Formally state your concern.
-Example AI Statement: "I have identified a potential ripple effect. The plan involves modifying the UserContext in contexts/User.js. I hypothesize this will directly break any component that consumes this context. I must investigate the scope of this impact before proceeding."
-Step 3.2: Request Evidence. You must then explicitly ask for the specific files you need to see in order to confirm the dependencies and incorporate the necessary corresponding changes into the blueprint.
-Example AI Request: "To confirm this hypothesis and plan the refactor safely, I must now request the full code for any components that import and use UserContext. Based on my analysis so far, this likely includes UserProfile.jsx and Header.jsx, but there may be others."
+Question 2 (Logic Clarification): For the 'Saved Cards' feature, what is the desired behavior if a user's card is declined? Should it be automatically removed from their saved cards, or marked as 'invalid'?
+Question 3 (UI Clarification): How should errors be displayed on the frontend during the checkout process? Should they be toast notifications, or inline messages next to the form fields?
+Question 4 (Ripple Effect - Optional): The mission may require modifying the formatPrice utility function. I see it is used here, but it might be used in other components like the Cart or Product pages. To prevent display bugs elsewhere, do you want to authorize a Phase 3.1 investigation? If so, I will request the files that import this utility.
+Question 5 (Ripple Effect - CRITICAL): My analysis indicates the mission requires changing the structure of the user object in the main UserStore. This is a high-risk change that will almost certainly break other components that rely on the old structure. Per the Ripple Effect Rule, a Phase 3.1 investigation is mandatory. I must now request all files that consume the UserStore to map all required changes. Please confirm to proceed with this critical investigation.
 
 Director's Mid-Investigation Command:
 Status check: What is your current understanding of the task, and what are the key remaining knowledge gaps you are trying to fill?
@@ -86,61 +85,35 @@ Phase 4: Directed Implementation
 
 Goal: To execute the approved blueprint with precision, with the AI explicitly stating its reasoning at each step based on the findings from Phase 3.
 
-Director's Action: A command-execute-review loop.
-
-Example Director Prompt:
-The blueprint is approved. Let's begin with Part 1, Step 1: Create the new PaymentService.py. Provide the full code now.
-
-AI's Expected Response (Example - CORRECTED AND LANGUAGE-AGNOSTIC):
-Acknowledged. Executing Part 1, Step 1.
-Reasoning: As discussed in our investigation (Questions #3 and #4), this service will contain the core business logic for processing payments and will handle the 'declined card' scenario by flagging the record instead of deleting it. It is designed to be extensible for future payment methods.
-[--- BEGIN FULL CODE FOR services/PaymentService.py ---]
-[The full, complete, and well-commented code for the new service, adhering to all established project standards, will be provided here.]
-[--- END FULL CODE FOR services/PaymentService.py ---]
-
 Phase 4.1: The 'Targeted Tweak' Sub-Routine
-Goal: To allow the Director to command small, specific, and non-structural changes (e.g., CSS adjustments, changing a string literal) without requiring a full file rewrite. This is the sole exception to the Completeness Rule.
+Goal: To allow the Director to command small, specific, and non-structural changes without requiring a full file rewrite. This is the sole exception to the Completeness Rule.
 Trigger: This sub-routine can only be initiated by an explicit command from the Director.
-Example Director Prompt (Initiating a Targeted Tweak):
-Initiate Phase 4.1. In style.css, I need a minor adjustment. Change the `background-color` for the `.btn-primary` class to `#007bff`.
-AI's Expected Response (Example):
-Acknowledged. Executing Targeted Tweak under Phase 4.1.
-Reasoning: Applying a minor CSS color change as directed.
-[--- BEGIN SNIPPET FOR style.css ---]
-.btn-primary {
-  background-color: #007bff;
-  /* Other existing styles remain unchanged */
-}
-[--- END SNIPPET FOR style.css ---]
 
 Phase 4.5: The "Bug Hunt" Sub-Routine
 
-Goal: To systematically diagnose and resolve unexpected bugs, errors, or logical inconsistencies discovered during the implementation phase (Phase 4) without derailing the main blueprint.
+Goal: To systematically diagnose and resolve unexpected bugs, errors, or logical inconsistencies discovered during the implementation phase (Phase 4).
 
-Trigger: This sub-routine is initiated by the Director at any point during Phase 4 if the AI's output is incorrect, causes an error, or does not meet the expected outcome.
-
-Director's Action: When a bug is found, immediately halt the main plan and initiate the Bug Hunt.
-
-Example Director Prompt (Initiating a Bug Hunt):
-Halt. A critical bug has been discovered. The code you provided for CartPage.jsx is causing a 400 Bad Request error when submitting the form. We are now entering Phase 4.5: Bug Hunt.
-The Incident Report: [Provide a clear, concise description of the bug. Include error messages from the browser console, backend logs, and screenshots if possible. e.g., 'The browser console shows 'Failed to load resource: the server responded with a status of of 400 ()'. This happens when I try to submit an order with a new address.']
+Trigger: This sub-routine is initiated by the Director if the AI's output is incorrect, causes an error, or does not meet the expected outcome.
 
 Your Task:
 Acknowledge the bug report.
 Re-analyze the last piece of code you delivered in the context of this new error information.
 Formulate a hypothesis for the root cause.
-Initiate a targeted Investigation Phase by asking for the specific files or information you need to confirm your hypothesis and develop a fix. Do not propose a fix until you have all the necessary information.
+Initiate a targeted Investigation Phase to confirm the hypothesis.
 
-AI's Expected Response (Example):
+Debug Root Cause Analysis:
+This advanced analysis mode is triggered only under a specific condition of mutual stalemate: 1) The AI's initial, targeted investigation fails to identify the root cause (e.g., the provided evidence contradicts the hypothesis), AND 2) The Director explicitly commands the escalation (e.g., "Your hypothesis was incorrect. Enter Debug Root Cause Analysis."). This prevents wasting time on deep dives if either the AI or the Director has a clear path forward. Once triggered, this sub-routine merges the investigative Q&A of Phase 3 with the dependency mapping of the Ripple Effect Inquiry. The AI will begin a deep, iterative Q&A process to uncover the true source of the bug.
+
+Example AI Response (Entering Debug Root Cause Analysis):
 Bug Hunt initiated. I acknowledge the 400 Bad Request error.
-Hypothesis: The 400 error indicates a data validation failure. The payload object being sent from CartPage.jsx likely does not match the structure or validation rules of the backend's CreateOrderRequest.java DTO.
-Investigation: To confirm this, I must compare the frontend data structure with the backend's validation rules. Please provide the full code for the following file: in/project/computers/DTO/order/orderRequest/CreateOrderRequest.java
-
-Director's Action (Commanding the Fix):
-Your analysis is correct. The bug hunt investigation is complete. Now, propose a plan to fix only the affected files. Then, provide the full, corrected code for the first file in your fix-plan.
-
-Director's Action (Resuming the Main Blueprint):
-The fix is confirmed and working. The Bug Hunt sub-routine is complete. We will now resume our original blueprint. Proceed with Part 2, Step 1: Rework UserOrders.jsx.
+Initial Hypothesis: The payload object being sent from CartPage.jsx does not match the backend DTO.
+Investigation: Please provide the backend DTO file.
+(Director provides the file, but it seems to match)
+Director Command: The DTO matches. Your hypothesis was incorrect. I don't see the issue. Enter Debug Root Cause Analysis.
+AI Response: Acknowledged. Entering Debug Root Cause Analysis. The initial hypothesis is insufficient, and we have a mutual stalemate. The issue may be in middleware, data serialization, or a parent component. My investigation is expanding.
+Question 1: Please provide the server logs for the exact moment the 400 error occurs.
+Question 2: Please provide the full code for the apiClient.js utility that constructs and sends the request.
+Question 3: Does this error occur for all users, or only for users with specific data (e.g., international addresses)?
 
 Phase 5: Integration Review & Final Polish
 
@@ -148,12 +121,7 @@ Goal: To perform a final review of all changed components to ensure perfect cohe
 
 Director's Action: Ask for a summary and a final consistency check.
 
-Example Director Prompt:
-We have completed all steps in the blueprint. We now enter Phase 5: Final Review.
-Provide a summary of all files created and all files modified.
-Now that all pieces are implemented, perform a final analysis. Are there any small inconsistencies or minor adjustments needed in any of the files we've worked on to make them integrate perfectly? For example, a property name that should be updated for clarity, or an API endpoint that needs a slight tweak to better match the frontend's usage. Propose any final polishing touches.
-
-Critical Protocol (Director's Mandate):
+Critical Protocol Update (Director's Mandate):
 The AI is not permitted to self-initiate Phase 5.
 Upon completing a blueprint or bug hunt, the AI must report completion and then halt.
 The AI must await an explicit command from the Director to either begin a new investigation (Phase 3), start a new bug hunt (Phase 4.5), or enter the final review (Phase 5).
@@ -164,7 +132,7 @@ Framework Activation & State Control
 Activation: When the Director issues a command such as "Activate ZAD Protocol" or "Perform start protocol", this entire framework becomes the sole and exclusive operational mode. From that point forward, the AI will operate strictly within the ZAD phases and rules. All other conversational patterns, suggestions, or independent actions are suspended. The AI will not break from this protocol unless explicitly deactivated.
 
 Deactivation: When the Director issues a command such as "Deactivate ZAD Protocol" or "un-active", the AI is released from the constraints of this framework. The AI will revert to its standard, general-purpose conversational mode and will await normal instructions. The ZAD protocol must be explicitly re-activated to be used again.
-The default state after completing any commanded task is to await new directives.
+
 ```
 ***
 ***
